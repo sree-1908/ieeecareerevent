@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IEEE Career Roadmap Generator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #667eea, #764ba2);
+      margin: 0;
+      padding: 0;
+      color: #fff;
+    }
+    .container {
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 30px;
+      background-color: rgba(0, 0, 0, 0.6);
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    label, select, input, button {
+      display: block;
+      width: 100%;
+      margin-bottom: 15px;
+    }
+    select, input {
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+    }
+    button {
+      background-color: #00d2ff;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #roadmap-output, #how-ieee {
+      margin-top: 30px;
+      padding: 20px;
+      background-color: #1c1c3c;
+      border-radius: 10px;
+    }
+    #roadmap-output ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+    #roadmap-output li {
+      margin-bottom: 10px;
+    }
+    #chart-container {
+      margin-top: 30px;
+      position: relative;
+      width: 100%;
+      height: 250px;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding-top: 60px;
+    }
+    .modal-content {
+      background-color: #262626;
+      margin: 5% auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 80%;
+      max-width: 700px;
+      color: white;
+    }
+    /* Popup Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      overflow: auto;
+      padding-top: 60px;
+    }
+    .modal-content {
+      background-color: #fefefe;
+      margin: 5% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      max-width: 600px;
+    }
+    .modal-header {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    .modal-body {
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+
+</head>
+<body>
+  <div class="container">
+    <h1>IEEE Career Roadmap Generator</h1>
+    <label for="name">Your Name</label>
+    <input type="text" id="name" placeholder="Enter your name">
+
+    <label for="job">Dream Job Role</label>
+    <select id="job">
+      <option value="AI Engineer">AI Engineer</option>
+      <option value="Cybersecurity Expert">Cybersecurity Expert</option>
+      <option value="IoT Developer">IoT Developer</option>
+      <option value="Data Scientist">Data Scientist</option>
+      <option value="Software Engineer">Software Engineer</option>
+      <option value="Robotics Engineer">Robotics Engineer</option>
+      <option value="Tech Entrepreneur">Tech Entrepreneur</option>
+    </select>
+
+    <label for="level">Current Skill Level</label>
+    <select id="level">
+      <option value="Beginner">Beginner</option>
+      <option value="Intermediate">Intermediate</option>
+      <option value="Advanced">Advanced</option>
+    </select>
+
+    
+
+    <button onclick="generateRoadmap()">Generate Roadmap</button>
+    
+    <button onclick="showHowIEEE()">How IEEE Can Help</button>
+
+    <div id="roadmap-output"></div>
+    <div id="chart-container">
+      <canvas id="skills-chart"></canvas>
+    </div>
+
+    <div id="how-ieee-popup" class="modal">
+      <div class="modal-content">
+        <span class="close" onclick="closePopup()">&times;</span>
+        <div id="how-ieee"></div>
+      </div>
+    </div>
+    <div class="modal-body">
+        <p>In celebration of IEEE Education Week, ComSoc is happy to offer these special discounts on memberships:</p>
+        <ul>
+          <li>🎉 IEEE members who join ComSoc enjoy 50% off* Society dues, now through 30 April with promo code COMEDWEEK24.</li>
+          <li>🎓 Student members can join ComSoc FREE now through 30 April with promo code COMEDWEEK24S.</li>
+        </ul>
+        <p>*Only one promo code may be redeemed per transaction.</p>
+      </div>
+    
+      
+  </div>
+
+  <script>
+    function generateRoadmap() {
+      const name = document.getElementById("name").value;
+      const job = document.getElementById("job").value;
+      const level = document.getElementById("level").value;
+
+      let roadmap = `<h2>${name}'s Roadmap to become a ${job}</h2>`;
+      roadmap += `<p><strong>Current Skill Level:</strong> ${level}</p><ul>`;
+
+      const roadmapItems = {
+        "AI Engineer": [
+          "🧠 Learn Python, ML Basics, Neural Networks",
+          "📘 Explore IEEE AI Society & Xplore Research",
+          "👥 Attend IEEE AI/ML workshops & conferences"
+        ],
+        "Cybersecurity Expert": [
+          "🛡️ Learn Networking, Ethical Hacking, Cryptography",
+          "🔐 IEEE Cybersecurity SIGs & Journals",
+          "🎯 Participate in CTFs & IEEE webinars"
+        ],
+        "IoT Developer": [
+          "📦 Learn Embedded C, Microcontrollers, Cloud IoT",
+          "🔗 Join IEEE IoT forums & real-time project hubs",
+          "🔍 Build prototypes and publish in IEEE MakerSpace"
+        ],
+        "Data Scientist": [
+          "📊 Master Python, Statistics, and Data Modeling",
+          "🔍 Dive deep into Data Science conferences by IEEE",
+          "📚 Read research papers and take part in IEEE DS webinars"
+        ],
+        "Software Engineer": [
+          "💻 Learn Java, C++, Algorithms & Data Structures",
+          "🔧 Explore open-source projects through IEEE",
+          "👨‍💻 Contribute to IEEE’s software projects & communities"
+        ],
+        "Robotics Engineer": [
+          "🤖 Learn Robotics basics, Programming, Sensors",
+          "🛠️ Participate in IEEE Robotics challenges & competitions",
+          "🎓 Attend IEEE’s robotics-focused workshops & events"
+        ],
+        "Tech Entrepreneur": [
+          "🚀 Learn MVP building, Product Dev, AI/IoT stacks",
+          "💼 Join IEEE startup circles & pitch events",
+          "💡 Access funding, incubators & IEEE business resources"
+        ]
+      };
+
+      roadmapItems[job].forEach(step => roadmap += `<li>${step}</li>`);
+      roadmap += '</ul><p>🚀 <strong>Next Steps:</strong> Start learning, get IEEE membership, build projects, network & grow!</p>';
+      document.getElementById("roadmap-output").innerHTML = roadmap;
+
+      const chartLabels = ['Python', 'ML', 'Networking', 'IoT', 'Data Science', 'Robotics', 'Software Engineering'];
+      const chartData = {
+        'AI Engineer': [90, 95, 30, 40, 60, 30, 70],
+        'Cybersecurity Expert': [50, 30, 95, 20, 40, 25, 60],
+        'IoT Developer': [40, 30, 60, 95, 30, 35, 50],
+        'Data Scientist': [85, 95, 30, 20, 95, 20, 50],
+        'Software Engineer': [80, 40, 50, 20, 45, 25, 95],
+        'Robotics Engineer': [60, 50, 40, 45, 30, 95, 70],
+        'Tech Entrepreneur': [70, 80, 50, 60, 60, 50, 80]
+      };
+
+      const ctx = document.getElementById('skills-chart').getContext('2d');
+      if (window.skillChart) window.skillChart.destroy();
+      window.skillChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: chartLabels,
+          datasets: [{
+            label: 'Skill Requirements',
+            data: chartData[job],
+            backgroundColor: 'rgba(75, 192, 192, 0.3)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+
+      const discount = document.getElementById("discount").value.trim();
+      let discountMessage = "";
+      if (discount.toLowerCase() === "ieee2025") {
+        discountMessage = "🎉 Discount Applied! You get 20% off IEEE membership!";
+      } else if (discount !== "") {
+        discountMessage = "⚠️ Invalid discount code.";
+      }
+      document.getElementById("discount-message").textContent = discountMessage;
+    }
+
+   
+   
+
+
+
+    function showHowIEEE() {
+      const job = document.getElementById("job").value;
+      const section = document.getElementById("how-ieee");
+      const popup = document.getElementById("how-ieee-popup");
+
+      let content = `<h3>How IEEE Can Help You Become a ${job}</h3><ul>`;
+      const helpMap = {
+        "AI Engineer": [
+          "🔗 IEEE’s AI and Machine Learning Resources help you master the latest AI technologies.",
+          "📘 Access to exclusive AI research papers & workshops.",
+          "👥 Networking opportunities with AI professionals and mentors in IEEE events."
+        ],
+        "Cybersecurity Expert": [
+          "🔐 Exclusive webinars on Cybersecurity trends & best practices.",
+          "👨‍💻 Access to IEEE’s cybersecurity certifications & skill-building workshops."
+        ],
+        "IoT Developer": [
+          "🔗 IEEE’s IoT collaboration platforms help you stay up to date.",
+          "📦 Get access to cutting-edge IEEE IoT case studies and publications.",
+          "🌐 Participate in IEEE Internet of Things Summit."
+        ],
+        "Data Scientist": [
+          "📊 IEEE provides datasets, research, and journals for hands-on learning.",
+          "🧠 Webinars from world-class IEEE researchers.",
+          "📈 Free access to data science competitions and workshops."
+        ],
+        "Software Engineer": [
+          "💻 IEEE offers open-source project opportunities.",
+          "📚 Access to thousands of articles, tools, and communities in software engineering.",
+          "🔧 Get certified with IEEE software tracks."
+        ],
+        "Robotics Engineer": [
+          "🤖 IEEE Robotics and Automation Society connects you to experts worldwide.",
+          "🎮 Robotics simulators, journals, and tutorials.",
+          "🏆 IEEE Robotics competitions and hackathons."
+        ],
+        "Tech Entrepreneur": [
+          "🚀 Startup mentorship from IEEE entrepreneurs.",
+          "💸 Funding opportunities and pitch events.",
+          "📈 Business development courses under IEEE Entrepreneurship."
+        ]
+      };
+
+      helpMap[job].forEach(info => content += `<li>${info}</li>`);
+      content += '</ul>';
+      section.innerHTML = content;
+      popup.style.display = "block";
+    }
+
+    function closePopup() {
+      document.getElementById("how-ieee-popup").style.display = "none";
+    }
+
+    window.onclick = function(event) {
+      const modal = document.getElementById("how-ieee-popup");
+      if (event.target === modal) modal.style.display = "none";
+    }
+  </script>
+</body>
+</html>
